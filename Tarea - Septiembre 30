@@ -1,0 +1,350 @@
+import java.util.ArrayList;
+import java.util.Scanner;
+
+// ------------------- CLASE PRINCIPAL -------------------
+public class Main {
+    static Administrador admin = new Administrador();
+
+    public static void main(String[] args) {
+        Menus menuPpal = new Menus(40, '*', '1');
+        ArrayList<String> options = new ArrayList<String>();
+
+        options.add("Agregar heladería");
+        options.add("Ver heladerías");
+        options.add("Editar heladería");
+        options.add("Eliminar heladería");
+        options.add("Agregar helado");
+        options.add("Agregar malteada");
+        options.add("Agregar topping a helado");
+        options.add("Terminar");
+
+        boolean salir = false;
+
+        while (!salir) {
+            int opcion = menuPpal.createMenu(options, false);
+
+            switch (opcion) {
+                case 1:
+                    admin.agregarHeladeria();
+                    break;
+                case 2:
+                    admin.verHeladerias();
+                    break;
+                case 3:
+                    admin.editarHeladeria();
+                    break;
+                case 4:
+                    admin.eliminarHeladeria();
+                    break;
+                case 5:
+                    admin.agregarHelado();
+                    break;
+                case 6:
+                    admin.agregarMalteada();
+                    break;
+                case 7:
+                    admin.agregarToppingAHelado();
+                    break;
+                case 8:
+                    salir = true;
+                    System.out.println("Programa finalizado.");
+                    break;
+                default:
+                    System.out.println("Opción inválida.");
+            }
+        }
+    }
+}
+
+// ------------------- CLASE ADMINISTRADOR -------------------
+class Administrador {
+    private ArrayList<Heladeria> listaHeladerias = new ArrayList<>();
+    private ArrayList<Helado> listaHelados = new ArrayList<>();
+    private ArrayList<Malteada> listaMalteadas = new ArrayList<>();
+    private Scanner sc = new Scanner(System.in);
+
+    public void agregarHeladeria() {
+        System.out.print("Ingrese ID de la heladería: ");
+        int id = sc.nextInt();
+        sc.nextLine();
+        System.out.print("Ingrese dirección: ");
+        String direccion = sc.nextLine();
+        listaHeladerias.add(new Heladeria(id, direccion));
+        System.out.println("✅ Heladería agregada.");
+    }
+
+    public void verHeladerias() {
+        if (listaHeladerias.isEmpty()) {
+            System.out.println("No hay heladerías registradas.");
+        } else {
+            for (Heladeria h : listaHeladerias) {
+                System.out.println("ID: " + h.id + " | Dirección: " + h.getDireccion());
+            }
+        }
+    }
+
+    public void editarHeladeria() {
+        System.out.print("Ingrese ID de heladería a editar: ");
+        int id = sc.nextInt();
+        sc.nextLine();
+        for (Heladeria h : listaHeladerias) {
+            if (h.id == id) {
+                System.out.print("Nueva dirección: ");
+                String dir = sc.nextLine();
+                h.setDireccion(dir);
+                System.out.println("✅ Heladería actualizada.");
+                return;
+            }
+        }
+        System.out.println("❌ No encontrada.");
+    }
+
+    public void eliminarHeladeria() {
+        System.out.print("Ingrese ID de heladería a eliminar: ");
+        int id = sc.nextInt();
+        listaHeladerias.removeIf(h -> h.id == id);
+        System.out.println("✅ Heladería eliminada (si existía).");
+    }
+
+    public void agregarHelado() {
+        System.out.print("Ingrese ID del helado: ");
+        int id = sc.nextInt();
+        System.out.print("Ingrese precio: ");
+        float precio = sc.nextFloat();
+        sc.nextLine();
+        System.out.print("Ingrese sabor: ");
+        String sabor = sc.nextLine();
+
+        ArrayList<String> sabores = new ArrayList<>();
+        sabores.add(sabor);
+
+        Helado h = new Helado(id, precio, sabores, 1);
+        listaHelados.add(h);
+        System.out.println("✅ Helado agregado.");
+    }
+
+    public void agregarMalteada() {
+        System.out.print("Ingrese ID de la malteada: ");
+        int id = sc.nextInt();
+        System.out.print("Ingrese precio: ");
+        float precio = sc.nextFloat();
+        sc.nextLine();
+        System.out.print("Ingrese sabor: ");
+        String sabor = sc.nextLine();
+
+        Malteada m = new Malteada(id, precio, sabor);
+        listaMalteadas.add(m);
+        System.out.println("✅ Malteada agregada.");
+    }
+
+    public void agregarToppingAHelado() {
+        if (listaHelados.isEmpty()) {
+            System.out.println("No hay helados para agregar toppings.");
+            return;
+        }
+        System.out.print("Ingrese ID del helado: ");
+        int id = sc.nextInt();
+        sc.nextLine();
+        for (Helado h : listaHelados) {
+            if (h.id == id) {
+                System.out.print("Ingrese nombre del topping: ");
+                String top = sc.nextLine();
+                h.addTopping(top);
+                System.out.println("✅ Topping agregado.");
+                return;
+            }
+        }
+        System.out.println("❌ Helado no encontrado.");
+    }
+}
+
+// ------------------- CLASE MENÚ -------------------
+class Menus {
+    private int windowWidth = 30;
+    private char borderChar = '*';
+    private char firstOption = '1';
+
+    public Menus(int windowWidth, char borderChar, char firstOption) {
+        this.windowWidth = windowWidth;
+        this.borderChar = borderChar;
+        this.firstOption = firstOption;
+    }
+
+    public int createMenu(ArrayList<String> options, boolean CENTERED) {
+        boolean DRAW_MENU = true;
+        char optionId = firstOption;
+        int option = 0;
+        Scanner input = new Scanner(System.in);
+
+        while (DRAW_MENU) {
+            optionId = firstOption;
+            System.out.println(borderLine());
+            for (String optionText : options) {
+                if (CENTERED)
+                    System.out.println(padding(optionId + ". " + optionText));
+                else
+                    System.out.println(optionId + ". " + optionText);
+                optionId++;
+            }
+            System.out.println(borderLine());
+            System.out.print("Seleccione una opción: ");
+            option = input.nextInt();
+            if (option >= (firstOption - '0') && option < ((firstOption - '0') + options.size())) {
+                DRAW_MENU = false;
+            } else {
+                System.out.println("❌ Opción inválida");
+            }
+        }
+        return option;
+    }
+
+    public String borderLine() {
+        String line = "";
+        for (int i = 0; i < windowWidth; i++) {
+            line += borderChar;
+        }
+        return line;
+    }
+
+    public String padding(String message) {
+        int padding = (windowWidth - message.length()) / 2;
+        String paddingString = "";
+        for (int i = 0; i < padding; i++) {
+            paddingString += " ";
+        }
+        return paddingString + message;
+    }
+}
+
+// ------------------- CLASE HELADO -------------------
+class Helado {
+    public int id;
+    public float precio;
+    private float precioTopping;
+    private ArrayList<String> sabores;
+    private ArrayList<String> toppings;
+    private int tipo;
+
+    public Helado(int id, float precio, ArrayList<String> sabores, int tipo) {
+        this.id = id;
+        this.precio = precio;
+        this.sabores = sabores;
+        this.tipo = tipo;
+        this.toppings = new ArrayList<String>();
+        this.precioTopping = 500;
+    }
+
+    public float calcularPrecio() {
+        return this.precio + (this.precioTopping * this.toppings.size());
+    }
+
+    public void addTopping(String toppingType) {
+        this.toppings.add(toppingType);
+    }
+
+    public ArrayList<String> getSabores() {
+        return this.sabores;
+    }
+
+    public ArrayList<String> getToppings() {
+        return this.toppings;
+    }
+}
+
+// ------------------- CLASE MALTEADA -------------------
+class Malteada {
+    public int id;
+    public float precio;
+    private String sabor;
+
+    public Malteada(int id, float precio, String sabor) {
+        this.id = id;
+        this.precio = precio;
+        this.sabor = sabor;
+    }
+
+    public float calcularPrecio() {
+        return this.precio;
+    }
+
+    public String getSabor() {
+        return sabor;
+    }
+}
+
+// ------------------- CLASE PEDIDO -------------------
+class Pedido {
+    private ArrayList<Helado> listaHelados;
+    private ArrayList<Malteada> listaMalteadas;
+    public int mesa;
+    public float propina;
+
+    public Pedido(int mesa) {
+        this.mesa = mesa;
+        this.listaHelados = new ArrayList<Helado>();
+        this.listaMalteadas = new ArrayList<Malteada>();
+    }
+
+    public float calcularCuenta() {
+        float total = 0;
+        for (Helado helado : this.listaHelados) {
+            total += helado.calcularPrecio();
+        }
+        for (Malteada malteada : this.listaMalteadas) {
+            total += malteada.calcularPrecio();
+        }
+        return total + this.propina;
+    }
+
+    public void addHelado(Helado producto) {
+        this.listaHelados.add(producto);
+    }
+
+    public void addMalteada(Malteada producto) {
+        this.listaMalteadas.add(producto);
+    }
+}
+
+// ------------------- CLASE HELADERÍA -------------------
+class Heladeria {
+    public int id;
+    private String direccion;
+    private ArrayList<Helado> listaHeladosDisponibles;
+    private ArrayList<Malteada> listaMalteadasDisponibles;
+    private ArrayList<Pedido> listaPedidos;
+
+    public Heladeria(int id, String direccion) {
+        this.id = id;
+        this.direccion = direccion;
+        this.listaHeladosDisponibles = new ArrayList<Helado>();
+        this.listaMalteadasDisponibles = new ArrayList<Malteada>();
+        this.listaPedidos = new ArrayList<Pedido>();
+    }
+
+    public void setDireccion(String direccion) {
+        this.direccion = direccion;
+    }
+
+    public String getDireccion() {
+        return this.direccion;
+    }
+}
+
+// ------------------- CLASE TOPPING -------------------
+class Topping {
+    private String nombre;
+    private float precio;
+
+    public Topping(String nombre, float precio) {
+        this.nombre = nombre;
+        this.precio = precio;
+    }
+
+    public String getNombre() {
+        return nombre;
+    }
+
+    public float getPrecio() {
+        return precio;
+    }
+}
